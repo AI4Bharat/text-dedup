@@ -1,4 +1,4 @@
 [submodule "deduplicate-text-datasets"]
 	path = deduplicate-text-datasets
 	url = git@github.com:AI4Bharat/deduplicate-text-datasets.git
-	branch = main
+	branch = master

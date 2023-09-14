@@ -18,6 +18,7 @@ from typing import List
 from typing import Literal
 from typing import Sequence
 from typing import Tuple
+import tqdm
 
 import datasets
 from datasets import Dataset
@@ -292,12 +293,14 @@ if __name__ == "__main__":
 
     assert args.path is not None, "Please specify `path` for `load_dataset`."
 
-    temp_output_dir = Path(args.google_repo_path) / "output"
-    temp_dir = Path(args.google_repo_path) / "tmp"
+    temp_output_dir = Path(args.output) / "intermediate"
+    temp_dir = Path(args.output) / "tmp"
+
     temp_output_dir.mkdir(exist_ok=True, parents=True)
     temp_dir.mkdir(exist_ok=True, parents=True)
-    temp_text = "output/temp_text.txt"
-    temp_output = "output/temp_output.txt"
+
+    temp_text = temp_output_dir / "data.txt"
+    temp_output = temp_output_dir / "byte_ranges.txt"
     timer = Timer()
 
     with timer("Total"):
@@ -316,8 +319,8 @@ if __name__ == "__main__":
         with timer("Preprocessing"):
             offsets: List[slice] = []
             start = 0
-            with open(Path(args.google_repo_path) / temp_text, "wb") as f:
-                for doc in ds:
+            with open(temp_text, "wb") as f:
+                for doc in tqdm.tqdm(ds):
                     doc_bytes = doc[args.column].encode("utf-8")
                     end = start + len(doc_bytes)
                     offsets.append(slice(start, end))
@@ -326,27 +329,27 @@ if __name__ == "__main__":
 
         with timer("SuffixArray"):
             __run_command(
-                f"python scripts/make_suffix_array.py {temp_text}",
+                f"python scripts/make_suffix_array.py {temp_text.resolve()}",
                 args.google_repo_path,
             )
 
         with timer("SelfSimilar"):
             __run_command(
-                f"cargo run self-similar --data-file {temp_text}"
+                f"cargo run self-similar --data-file {temp_text.resolve()}"
                 f" --length-threshold {args.k} --cache-dir {args.cache_dir} --num-threads {os.cpu_count()}",
                 args.google_repo_path,
             )
             __run_command(
-                f"cargo run collect --data-file {temp_text}"
+                f"cargo run collect --data-file {temp_text.resolve()}"
                 f" --length-threshold {args.k} --cache-dir {args.cache_dir} >"
-                f" {temp_output}",
+                f" {temp_output.resolve()}",
                 args.google_repo_path,
             )
 
         with timer("Restore"):
             duplicate_slices, duplicate_size = restore_and_merge(
                 offsets,
-                Path(args.google_repo_path) / temp_output,
+                temp_output,
                 args.k,
                 args.strategy,
             )
@@ -366,14 +369,21 @@ if __name__ == "__main__":
             )
 
         with timer("Saving"):
-            ds.save_to_disk(args.output)
+            output_path = os.path.join(args.output, "exact_deduped")
+            os.makedirs(output_path, exist_ok=True)
+            ds.save_to_disk(output_path)
 
         with timer("Cleaning"):
+
             if args.clean_cache:
                 ds.cleanup_cache_files()
-                shutil.rmtree(temp_output_dir)
-                shutil.rmtree(temp_dir)
                 shutil.rmtree(args.cache_dir)
+                shutil.rmtree(temp_dir)
+
+            if args.clean_intermediates:
+                shutil.rmtree(temp_output_dir)
+                
+                
 
     PAD = 30
     for k, v in timer.elapsed_times.items():

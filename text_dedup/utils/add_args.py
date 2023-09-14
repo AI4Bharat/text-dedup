@@ -197,6 +197,9 @@ def add_sa_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:  # 
     parser.add_argument(
         "--google_repo_path", type=str, help="Path to google-research-deduplication codebase", required=True
     ),
+    parser.add_argument(
+        "--clean_intermediates", action=argparse.BooleanOptionalAction, help="Whether to remove all intermediate files", default=False
+    ),
     return parser
 
 
