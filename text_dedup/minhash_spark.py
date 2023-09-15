@@ -371,6 +371,10 @@ def optimal_param(
 
 
 if __name__ == "__main__":  # pragma: no cover
+
+    command = ' '.join(sys.argv)
+    print("Command used to run this script: ", command)
+
     import argparse
 
     parser = argparse.ArgumentParser(description="Near-deduplicating with PySpark")
