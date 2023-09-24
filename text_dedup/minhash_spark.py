@@ -430,20 +430,20 @@ if __name__ == "__main__":  # pragma: no cover
         log.debug(f"{WRITE_ROWS=}")
         log.debug(f"{DATA_SIZE=}")
 
-        # print(f"Using {B=}, {R=}")
-        # print(f"{args.input=}")
-        # print(f"{args.output=}")
-        # print(f"{args.threshold=}")
-        # print(f"{args.ngram_size=}")
-        # print(f"{args.min_length=}")
-        # print(f"{args.num_perm=}")
-        # print(f"{args.column=}")
-        # print(f"{WRITE_ROWS=}")
-        # print(f"{DATA_SIZE=}")
+        print(f"Using {B=}, {R=}")
+        print(f"{args.input=}")
+        print(f"{args.output=}")
+        print(f"{args.threshold=}")
+        print(f"{args.ngram_size=}")
+        print(f"{args.min_length=}")
+        print(f"{args.num_perm=}")
+        print(f"{args.column=}")
+        print(f"{WRITE_ROWS=}")
+        print(f"{DATA_SIZE=}")
 
         for col, dtype in df.dtypes:
             log.debug(f"{col:<64}: {dtype}")
-            # print(f"{col:<64}: {dtype}")
+            print(f"{col:<64}: {dtype}")
 
     df = df.withColumn("__id__", F.monotonically_increasing_id()).cache()
     records = df.select("__id__", args.column).rdd
@@ -482,7 +482,7 @@ if __name__ == "__main__":  # pragma: no cover
 
     if duplicate_edges.count() == 0:
         log.debug("No components found.")
-        # print("No components found.")
+        print("No components found.")
         df = df.drop("__id__").cache()
         count = df.count()
         df.repartition(max(1, count // WRITE_ROWS)).withColumn("__pid__", F.spark_partition_id()).write.partitionBy(
@@ -491,8 +491,8 @@ if __name__ == "__main__":  # pragma: no cover
 
         log.debug(f"Output:                                 {args.output}")
         log.debug(f"Time:                                   {time.time() - start_time:.2f}s")
-        # print(f"Output:                                 {args.output}")
-        # print(f"Time:                                   {time.time() - start_time:.2f}s")
+        print(f"Output:                                 {args.output}")
+        print(f"Time:                                   {time.time() - start_time:.2f}s")
 
         sys.exit(0)
 
@@ -529,20 +529,20 @@ if __name__ == "__main__":  # pragma: no cover
         log.debug(f"Number of rows after:                   {FINAL_SIZE}")
         log.debug(f"Percentage of rows kept:                {FINAL_SIZE / max(0, DATA_SIZE) * 100:.2f}%")  # type: ignore
 
-        # print(f"CC converged:                           {converged}")
-        # print(f"CC iterations:                          {iteration}")
-        # print(f"Number of rows before:                  {DATA_SIZE}")  # type: ignore
-        # print(f"Number of duplicate rows:               {NUM_DUPLICATE}")  # type: ignore
-        # print(f"Number of duplicate clusters:           {NUM_CLUSTER}")  # type: ignore
-        # print(f"Number of rows after:                   {FINAL_SIZE}")
-        # print(f"Percentage of rows kept:                {FINAL_SIZE / max(0, DATA_SIZE) * 100:.2f}%")  # type: ignore
+        print(f"CC converged:                           {converged}")
+        print(f"CC iterations:                          {iteration}")
+        print(f"Number of rows before:                  {DATA_SIZE}")  # type: ignore
+        print(f"Number of duplicate rows:               {NUM_DUPLICATE}")  # type: ignore
+        print(f"Number of duplicate clusters:           {NUM_CLUSTER}")  # type: ignore
+        print(f"Number of rows after:                   {FINAL_SIZE}")
+        print(f"Percentage of rows kept:                {FINAL_SIZE / max(0, DATA_SIZE) * 100:.2f}%")  # type: ignore
 
     log.debug("-" * 120)
     log.debug(f"Output:                                 {args.output}")
     log.debug(f"Time:                                   {time.time() - start_time:.2f}s")
     log.debug("-" * 120)
 
-    # print("-" * 120)
-    # print(f"Output:                                 {args.output}")
-    # print(f"Time:                                   {time.time() - start_time:.2f}s")
-    # print("-" * 120)
+    print("-" * 120)
+    print(f"Output:                                 {args.output}")
+    print(f"Time:                                   {time.time() - start_time:.2f}s")
+    print("-" * 120)
